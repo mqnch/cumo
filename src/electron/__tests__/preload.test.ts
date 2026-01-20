@@ -1,28 +1,30 @@
 import { expect, it, vi } from 'vitest'
 import { IPC_CHANNELS } from '../ipc'
 
-const exposeInMainWorld = vi.fn()
-const invoke = vi.fn()
+const mocks = vi.hoisted(() => ({
+  exposeInMainWorld: vi.fn(),
+  invoke: vi.fn(),
+}))
 
 vi.mock('electron', () => ({
   contextBridge: {
-    exposeInMainWorld,
+    exposeInMainWorld: mocks.exposeInMainWorld,
   },
   ipcRenderer: {
-    invoke,
+    invoke: mocks.invoke,
   },
 }))
 
 import '../preload'
 
 it('exposes the electron API and wires IPC calls', () => {
-  expect(exposeInMainWorld).toHaveBeenCalledOnce()
+  expect(mocks.exposeInMainWorld).toHaveBeenCalledOnce()
 
-  const [, api] = exposeInMainWorld.mock.calls[0]
+  const [, api] = mocks.exposeInMainWorld.mock.calls[0]
 
   api.hideWindow()
-  expect(invoke).toHaveBeenCalledWith(IPC_CHANNELS.hideWindow)
+  expect(mocks.invoke).toHaveBeenCalledWith(IPC_CHANNELS.hideWindow)
 
   api.resizeWindow({ width: 320, height: 160 })
-  expect(invoke).toHaveBeenCalledWith(IPC_CHANNELS.resizeWindow, { width: 320, height: 160 })
+  expect(mocks.invoke).toHaveBeenCalledWith(IPC_CHANNELS.resizeWindow, { width: 320, height: 160 })
 })
