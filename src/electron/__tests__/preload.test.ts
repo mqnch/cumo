@@ -28,4 +28,7 @@ it('exposes the electron API and wires IPC calls', async () => {
 
   api.resizeWindow({ width: 320, height: 160 })
   expect(mocks.invoke).toHaveBeenCalledWith(IPC_CHANNELS.resizeWindow, { width: 320, height: 160 })
+
+  await api.getBackendPort()
+  expect(mocks.invoke).toHaveBeenCalledWith(IPC_CHANNELS.getBackendPort)
 })

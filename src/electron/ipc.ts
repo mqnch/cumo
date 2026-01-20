@@ -1,8 +1,10 @@
 import { BrowserWindow, ipcMain } from 'electron'
+import { getBackendPort } from './backend'
 
 export const IPC_CHANNELS = {
   hideWindow: 'cumo:hideWindow',
   resizeWindow: 'cumo:resizeWindow',
+  getBackendPort: 'cumo:getBackendPort',
 } as const
 
 type ResizePayload = {
@@ -22,5 +24,9 @@ export function registerIpcHandlers(window: BrowserWindow) {
     if (typeof width === 'number' && typeof height === 'number') {
       window.setSize(width, height)
     }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.getBackendPort, () => {
+    return getBackendPort()
   })
 }
