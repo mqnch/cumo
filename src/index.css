@@ -40,12 +40,50 @@ body,
 
 body {
   margin: 0;
-  background: #09090b;
+  background: transparent;
   color: #f4f4f5;
   font-family: "Input Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+@keyframes glow-border {
+  0% {
+    box-shadow: 
+      2px 0 8px rgba(255, 255, 255, 0.3),
+      -2px 0 8px transparent,
+      0 2px 8px transparent,
+      0 -2px 8px transparent;
+  }
+  25% {
+    box-shadow: 
+      2px 0 8px transparent,
+      -2px 0 8px transparent,
+      0 2px 8px rgba(255, 255, 255, 0.3),
+      0 -2px 8px transparent;
+  }
+  50% {
+    box-shadow: 
+      2px 0 8px transparent,
+      -2px 0 8px rgba(255, 255, 255, 0.3),
+      0 2px 8px transparent,
+      0 -2px 8px transparent;
+  }
+  75% {
+    box-shadow: 
+      2px 0 8px transparent,
+      -2px 0 8px transparent,
+      0 2px 8px transparent,
+      0 -2px 8px rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    box-shadow: 
+      2px 0 8px rgba(255, 255, 255, 0.3),
+      -2px 0 8px transparent,
+      0 2px 8px transparent,
+      0 -2px 8px transparent;
+  }
 }
 
 input,
@@ -56,7 +94,7 @@ textarea {
 }
 
 select {
-  font-size: 14px !important;
+  font-size: 13px !important;
   line-height: 1 !important;
 }
 

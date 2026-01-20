@@ -331,8 +331,8 @@ function CumoInput() {
   }, [backendBaseUrl, debouncedText])
 
   return (
-    <div className="h-full w-full overflow-hidden p-1.5">
-      <div className="h-full w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-zinc-950 via-zinc-950 to-zinc-900/70 px-3 pt-2 pb-3 shadow-[0_16px_48px_rgba(0,0,0,0.5)]">
+    <div className="h-full w-full overflow-hidden p-1.5 backdrop-blur-md">
+      <div className="h-full w-full overflow-hidden rounded-xl border border-white/10 bg-black px-3 pt-2 pb-3 shadow-[0_16px_48px_rgba(0,0,0,0.5)]">
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
             <img src="/cumo.svg" alt="Cumo" className="w-5 h-5 rounded" />
@@ -373,12 +373,17 @@ function CumoInput() {
               </div>
             ) : null}
 
-            <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white/90 shadow-inner transition focus-within:border-white/30 focus-within:bg-white/10">
-              <div className="select-none text-xs font-semibold text-white/40">{'>'}</div>
+            <div 
+              className="relative flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white/90 shadow-inner transition focus-within:border-white/30 focus-within:bg-white/10"
+              style={{
+                animation: 'glow-border 3s linear infinite',
+              }}
+            >
+              <div className="relative select-none text-xs font-semibold text-white/40">{'>'}</div>
               <input
                 ref={inputRef}
                 autoFocus
-                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+                className="relative w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
                 placeholder="type an event // ↑↓ to switch calendar"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
