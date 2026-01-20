@@ -30,4 +30,7 @@ backend/venv/
 venv/
 __pycache__/
 *.py[cod]
+backend/token.json
+backend/credentials.json
+backend/settings.json
 

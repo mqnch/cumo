@@ -51,7 +51,7 @@ async function resolveBackendPort() {
     return Number.isFinite(parsed) ? parsed : 5000
   }
 
-  for (const candidate of [5000, 5001, 5002, 5050]) {
+  for (const candidate of [5001, 5000, 5002, 5050]) {
     // eslint-disable-next-line no-await-in-loop
     const free = await isPortFree(candidate)
     if (free) return candidate

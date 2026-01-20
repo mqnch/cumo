@@ -5,7 +5,7 @@ import { registerIpcHandlers } from './ipc'
 import { attachBlurToHide, registerToggleShortcut, toggleWindow } from './window'
 
 const WINDOW_WIDTH = 700
-const WINDOW_HEIGHT = 90
+const WINDOW_HEIGHT = 130
 
 function getPreloadPath() {
   return path.join(process.cwd(), 'dist-electron', 'preload.cjs')

@@ -349,12 +349,28 @@ class Parser:
                 "type": intent_type
             }
         
+        # Check if there's an explicit time pattern in the text FIRST
+        # This determines if we should treat it as all-day or timed event
+        has_explicit_time = extract_explicit_time(text) is not None
+        
         time_tuple = self.extract_time(text, date_obj)
         
         if date_obj and time_tuple:
+            # Explicit time found - use it
             date_obj = merge_datetime_time(date_obj, time_tuple)
         elif time_tuple and not date_obj:
+            # Time found but no date - use current date with the time
             date_obj = merge_datetime_time(datetime.now(), time_tuple)
+        elif date_obj and not has_explicit_time:
+            # No explicit time found in text - set to midnight for all-day event
+            # This overrides any default time that dateparser might have added
+            # Preserve timezone info if present
+            if date_obj.tzinfo is not None:
+                from datetime import timezone
+                date_obj = date_obj.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=date_obj.tzinfo)
+            else:
+                date_obj = date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
+        # If date_obj is None and no time_tuple, leave it as None
         
         title = self.extract_title(normalized, date_obj)
         

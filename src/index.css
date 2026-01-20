@@ -1,12 +1,70 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Input Mono";
+  src: url("./assets/fonts/InputMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Input Mono";
+  src: url("./assets/fonts/InputMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Input Mono";
+  src: url("./assets/fonts/InputMono-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Electron overlay. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #root {
   height: 100%;
+  overflow: hidden;
 }
 
 body {
+  margin: 0;
   background: #09090b;
+  color: #f4f4f5;
+  font-family: "Input Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+input,
+select,
+button,
+textarea {
+  font: inherit;
+}
+
+select {
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+
+select option {
+  font-size: 5px !important;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
