@@ -1,3 +1,5 @@
+import atexit
+import logging
 import os
 import sys
 from pathlib import Path
@@ -10,9 +12,24 @@ if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
 from nlp import parse_text as parse_nlp_text, get_nlp_status
+from tasks import debug_task, start_consumer, stop_consumer
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+logger = logging.getLogger(__name__)
+
+_consumer_started = False
+
+
+def _ensure_consumer_started() -> None:
+    global _consumer_started
+    if _consumer_started:
+        return
+    start_consumer()
+    _consumer_started = True
+
+
+atexit.register(lambda: stop_consumer(graceful=True))
 
 
 def _resolve_port() -> int:
@@ -53,7 +70,16 @@ def health():
     return jsonify({"status": "ok", "nlp": get_nlp_status()}), 200
 
 
+@app.route('/debug/enqueue', methods=['POST'])
+def debug_enqueue():
+    payload = request.get_json(silent=True) or {}
+    result = debug_task(payload)
+    task_id = getattr(result, 'id', None)
+    return jsonify({"enqueued": True, "task_id": task_id}), 200
+
+
 if __name__ == '__main__':
+    _ensure_consumer_started()
     app.run(
         debug=os.environ.get("CUMO_BACKEND_DEBUG", "0") == "1",
         host=_resolve_host(),
