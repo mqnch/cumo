@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "types": ["node", "vitest/globals"],
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/electron/**/*.ts",
+    "src/electron/**/__tests__/**/*.ts",
+    "vitest.config.ts"
+  ]
+}

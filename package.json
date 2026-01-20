@@ -3,11 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "dist-electron/main.cjs",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "concurrently -k \"vite\" \"node scripts/build-electron.mjs --watch\" \"wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .\"",
+    "build": "vite build && node scripts/build-electron.mjs",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:build": "node scripts/build-electron.mjs",
+    "electron:dev": "node scripts/build-electron.mjs --watch",
+    "start": "electron .",
+    "test": "vitest"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -17,16 +22,20 @@
     "@eslint/js": "^9.39.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "@types/node": "^22.18.6",
     "@vitejs/plugin-react": "^5.1.1",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0",
+    "esbuild": "^0.24.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "typescript": "^5.7.3",
     "vite": "^7.2.4",
+    "vitest": "^2.1.9",
     "wait-on": "^9.0.3"
   }
 }
