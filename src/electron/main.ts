@@ -39,6 +39,11 @@ function createMainWindow() {
     },
   })
 
+  // On macOS, make sure the window appears above fullscreen apps
+  if (process.platform === 'darwin') {
+    mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+  }
+
   registerIpcHandlers(mainWindow)
   attachBlurToHide(mainWindow)
   registerToggleShortcut(() => toggleWindow(mainWindow))

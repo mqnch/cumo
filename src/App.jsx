@@ -50,6 +50,8 @@ function CumoInput() {
   const [submitError, setSubmitError] = useState(null)
   const [submitLoading, setSubmitLoading] = useState(false)
   const inputRef = useRef(null)
+  const parseControllerRef = useRef(null)
+  const selectRef = useRef(null)
 
   const debouncedText = useDebouncedValue(text, 250)
   const needsCalendar =
@@ -82,10 +84,10 @@ function CumoInput() {
   useEffect(() => {
     if (!window.electron?.resizeWindow) return
 
-    const needsExtraSpace = error || needsCalendar || submitError || submitLoading
+    const needsExtraSpace = error || needsCalendar || submitError
     const height = needsExtraSpace ? 380 : 130
     window.electron.resizeWindow({ width: 700, height })
-  }, [error, needsCalendar, submitError, submitLoading])
+  }, [error, needsCalendar, submitError])
 
   useEffect(() => {
     if (!backendBaseUrl) return
@@ -130,9 +132,13 @@ function CumoInput() {
             })
             .then((data) => {
               if (!active) return
-              const calendars = Array.isArray(data?.calendars) ? data.calendars : []
-              setCalendarOptions(calendars)
-              const primary = calendars.find((item) => item?.primary)
+              const allCalendars = Array.isArray(data?.calendars) ? data.calendars : []
+              // Filter out read-only calendars (only keep owner/writer access)
+              const writableCalendars = allCalendars.filter(
+                (cal) => cal?.accessRole === 'owner' || cal?.accessRole === 'writer'
+              )
+              setCalendarOptions(writableCalendars)
+              const primary = writableCalendars.find((item) => item?.primary)
               if (primary?.id) {
                 setSelectedCalendarId((current) => current ?? primary.id)
               }
@@ -181,12 +187,65 @@ function CumoInput() {
       })
   }
 
+  const handleInputKeyDown = (event) => {
+    // Handle Enter key for submission
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      handleSubmit()
+      return
+    }
+    
+    // Handle arrow keys for calendar navigation
+    if ((event.key === 'ArrowUp' || event.key === 'ArrowDown') && calendarOptions.length > 0) {
+      event.preventDefault()
+      const currentIndex = calendarOptions.findIndex((cal) => cal.id === selectedCalendarId)
+      let newIndex
+      
+      if (event.key === 'ArrowUp') {
+        newIndex = currentIndex <= 0 ? calendarOptions.length - 1 : currentIndex - 1
+      } else {
+        newIndex = currentIndex >= calendarOptions.length - 1 ? 0 : currentIndex + 1
+      }
+      
+      if (newIndex >= 0 && newIndex < calendarOptions.length) {
+        const newCalendarId = calendarOptions[newIndex].id
+        setSelectedCalendarId(newCalendarId)
+        setCalendarError(null)
+        
+        fetch(`${backendBaseUrl}/settings/calendar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ calendarId: newCalendarId }),
+        })
+          .then(async (res) => {
+            const { data, text } = await readResponse(res)
+            if (!res.ok) {
+              throw new Error(data?.error || text || `Calendar update failed (${res.status})`)
+            }
+          })
+          .catch((err) => {
+            setCalendarError(String(err?.message || err))
+          })
+      }
+    }
+  }
+
   const handleSubmit = async () => {
     if (!backendBaseUrl) return
     if (!selectedCalendarId) {
       setSubmitError('Select a calendar before scheduling.')
       return
     }
+
+    // Abort any ongoing parsing request when submitting
+    if (parseControllerRef.current) {
+      parseControllerRef.current.abort()
+      parseControllerRef.current = null
+    }
+    
+    // Clear parsing states
+    setIsLoading(false)
+    setError(null)
 
     const payload = preview ? { event: preview } : { text }
     setSubmitLoading(true)
@@ -224,7 +283,13 @@ function CumoInput() {
       return
     }
 
+    // Abort previous parsing request if it exists
+    if (parseControllerRef.current) {
+      parseControllerRef.current.abort()
+    }
+    
     const controller = new AbortController()
+    parseControllerRef.current = controller
     setIsLoading(true)
     setError(null)
 
@@ -251,9 +316,18 @@ function CumoInput() {
       })
       .finally(() => {
         setIsLoading(false)
+        // Clear the controller reference if this was the active one
+        if (parseControllerRef.current === controller) {
+          parseControllerRef.current = null
+        }
       })
 
-    return () => controller.abort()
+    return () => {
+      controller.abort()
+      if (parseControllerRef.current === controller) {
+        parseControllerRef.current = null
+      }
+    }
   }, [backendBaseUrl, debouncedText])
 
   return (
@@ -266,6 +340,7 @@ function CumoInput() {
           </div>
           {calendarOptions.length > 0 ? (
             <select
+              ref={selectRef}
               className="w-auto max-w-[400px] rounded border border-white/10 bg-zinc-900/70 px-1 py-0 text-[14px] leading-none text-white/80 outline-none transition focus:border-white/30 focus:ring-1 focus:ring-white/20"
               value={selectedCalendarId ?? ''}
               onChange={handleCalendarChange}
@@ -304,15 +379,10 @@ function CumoInput() {
                 ref={inputRef}
                 autoFocus
                 className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
-                placeholder="type an event…"
+                placeholder="type an event // ↑↓ to switch calendar"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    handleSubmit()
-                  }
-                }}
+                onKeyDown={handleInputKeyDown}
               />
             </div>
 
@@ -332,7 +402,12 @@ function CumoInput() {
               </div>
             ) : null}
 
-            {preview ? <div className="text-[12px] text-white/50">ready to push.</div> : null}
+            {preview ? (
+              <div className="flex items-center gap-1.5 text-[12px] text-white/50">
+                <span className="text-green-500">✓</span>
+                <span>ready to push</span>
+              </div>
+            ) : null}
           </div>
       </div>
     </div>
