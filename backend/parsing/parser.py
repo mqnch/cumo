@@ -36,7 +36,7 @@ class Parser:
     }
     
     NUMBER_WORDS = {
-       'zero' 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+       'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
         'twenty', 'thirty', 'forty', 'fifty'
     }
     

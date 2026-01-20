@@ -1,5 +1,6 @@
 import { app, BrowserWindow, globalShortcut } from 'electron'
 import path from 'node:path'
+import { startBackend, stopBackend } from './backend'
 import { registerIpcHandlers } from './ipc'
 import { attachBlurToHide, registerToggleShortcut, toggleWindow } from './window'
 
@@ -52,6 +53,7 @@ function createMainWindow() {
 }
 
 app.whenReady().then(() => {
+  startBackend()
   createMainWindow()
 
   app.on('activate', () => {
@@ -68,5 +70,6 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', () => {
+  stopBackend()
   globalShortcut.unregisterAll()
 })
