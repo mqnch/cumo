@@ -1,4 +1,4 @@
-# Cumo
+# Cumo (formerly CalendarCompanion)
 
 ## Local Development
 
